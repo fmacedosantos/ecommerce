@@ -1,13 +1,12 @@
 package com.fmacedosantos.ecommerce.entities;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "tb_user")
@@ -22,6 +21,12 @@ public class User implements Serializable {
 	private String email;
 	private String phone;
 	private String password;
+
+	@JsonIgnore // Essa anotação é necessária em decorrência do seguinte loop ao testar o findById: User tem uma lista de Order, cada Order tem um User, que
+	// tem uma lista de Order, e cada Order tem um User, ...nesse caso, ao usar essa anotação, também ocorre o lazy loading, o qual, a depender da associação,
+	// devolve o objeto associado ou não. Um exemplo seria o ManyToOne, que dá esse retorno. Já o caso contrário não, só se trocarmos o lugar de JsonIgnore para Order
+	@OneToMany(mappedBy = "client") // Configura o relacionamento em vista da classe User e mapeia o atributo de chave estrangeira da classe Order
+	private List<Order> orders = new ArrayList<>();
 	
 	public User() {
 		super();
@@ -76,22 +81,19 @@ public class User implements Serializable {
 		this.password = password;
 	}
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(id);
+	public List<Order> getOrders() {
+		return orders;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		User other = (User) obj;
-		return Objects.equals(id, other.id);
+	public boolean equals(Object o) {
+		if (o == null || getClass() != o.getClass()) return false;
+		User user = (User) o;
+		return Objects.equals(id, user.id);
 	}
-	
-	
+
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(id);
+	}
 }
