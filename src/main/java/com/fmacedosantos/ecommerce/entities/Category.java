@@ -1,5 +1,6 @@
 package com.fmacedosantos.ecommerce.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -16,7 +17,8 @@ public class Category implements Serializable {
     private Long id;
     private String name;
 
-    @Transient // Impede o JPA de tentar interpretar
+    @JsonIgnore // Novamente, por ser um relacionamento bidimensional, para não gerar um loop, precisamos dessa anotação
+    @ManyToMany(mappedBy = "categories")
     private Set<Product> products = new HashSet<>();
 
     public Category() {
