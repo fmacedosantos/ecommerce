@@ -19,8 +19,8 @@ public class OrderService {
     }
 
     public Order findById(Long id) {
-        Optional<Order> Order = repository.findById(id);
+        Optional<Order> obj = repository.findById(id);
 
-        return Order.get();
+        return obj.get();
     }
 }
