@@ -2,8 +2,11 @@ package com.fmacedosantos.ecommerce.services;
 
 import com.fmacedosantos.ecommerce.entities.User;
 import com.fmacedosantos.ecommerce.repositories.UserRepository;
+import com.fmacedosantos.ecommerce.services.exceptions.DatabaseException;
 import com.fmacedosantos.ecommerce.services.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +35,13 @@ public class UserService {
     }
 
     public void delete(Long id) {
-        repository.deleteById(id);
+        try {
+            if (!repository.existsById(id)) throw new ResourceNotFoundException(id);
+
+            repository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new DatabaseException(e.getMessage());
+        }
     }
 
     public User update(Long id, User obj) {
